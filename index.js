@@ -26,11 +26,14 @@ const {dcryptUserPass, crypUserPass} = require("./utils/crypUncryt.js");
 const { conectando,controlSessiones } = require("./utils/conectMysql.js");
 const { cargaRemitos, cargaRemitos2, proveedorADb, consultaCuit} = require("./utils/remitoDb.js");
 const { consultaUsuario, crearUsuario , prb, consultaLocalNivel } = require("./utils/usersDb.js");
-const {tokenCreate, verifToken, tokenData} = require ("./utils/tokenAccess.js")
+const {tokenCreate, tokenData} = require ("./utils/tokenAccess.js")
 
 
 const cors = require("cors");
 const { stringify } = require("uuid");
+
+
+
 const app = express();
 
 app.use(cors(
@@ -39,6 +42,8 @@ app.use(cors(
     origin:true
   }
 )); //Funciona mientras este bien direccionado con este dominio(Axios => 192.168...)
+
+// MIDDLEWARE --------------------------------------------
 
 
 app.use(cookieParser());
@@ -76,7 +81,61 @@ app.use(session({
 
 //---------------------------------------------------------
 
+const tokenVal =  async (req,res,next)=>{
+
+  //cookieParser(req,res,next)
+    
+    const dataToken = req.query.token
+
+    if(dataToken===undefined) res.json({"tokenError":true})
+    
+  //  console.log("Cookie token --> "+Object.keys(dataToken))
+  //console.log("Cookie token --> "+dataToken)
+  
+    
+    if(!dataToken) next(new Error("Sin Token Cris"))
+    
+    try {
+      const verTok = jwt.verify(dataToken,process.env.SECRET)
+  
+        if(verTok.exp < Date.now()) console.log("ya paso")
+        
+        //console.log(verTok.exp)
+        //console.log(Date.now())
+        
+        if(!verTok){
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.send('<a href="http://192.168.0.16:3000"> Consulte con el Administrador (Err-1005)</a>')
+        }else{
+            if(verTok.exp < Date.now()){
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                //res.redirect('http://192.168.0.16')
+        res.send('<a href="http://192.168.0.16:3000"> Consulte con el Administrador (Err-1005)</a>')
+  
+            } 
+        }
+        
+    } catch (error) {
+        console.log(error)
+  
+  
+        res.json({"tokenError":true})
+  
+    }
+    
+    next()
+  }
+
+  const prbSite = (req,res,next)=>{
+    return res.send(`<a href='${process.env.SITIOFRONT}'>Error al cargar, vuelva al login.</a>`)
+    next()
+  }
+
+
+//_____________________________________________________________________________
+
 const puerto = process.env.PORT;
+
 
 app.listen(puerto, (req, res) => {
   console.log(`Servidor en puerto ${puerto}`);
@@ -88,20 +147,26 @@ app.post("/login", async (req, res) => {
   
   const { name, psswd } = req.body;
 
+
+
   if (name === undefined && psswd === undefined) return ({ "mensaje": "Faltan Datos" , "auth": false });
 
   const dbnamecontr = await conectando("tablaprb", name, psswd)
 
-  if (dbnamecontr.mensaje === "Err01") return res.json({ auth: false });
+  if (dbnamecontr.mensaje === "Err01") return res.json({ auth: false, mensaje: "Verique sus datos." });
 
   if (!dbnamecontr.nombre === name) return res.json({ "mensaje": "Sin usuarios con ese dato" });
+  console.log(dbnamecontr.usser)
+  console.log(name)
+
+  if(dbnamecontr.usser!==name) return res.json({ auth: false, mensaje: "Verique sus datos." });
 
   //________________________________
   const controlPass= await dcryptUserPass(psswd,dbnamecontr.pass)
         
 
     if(!controlPass) {
-      return res.json({auth:"false0"})
+      return res.json({ auth: false, mensaje: "Verique sus datos." })
     }else{
 
       //········· token ···················
@@ -117,7 +182,7 @@ app.post("/login", async (req, res) => {
       
       const token = tokenCreate(aToken)
 
-      console.log(dbnamecontr)
+      // console.log(dbnamecontr)
       //····································
 
       // console.log({
@@ -142,7 +207,6 @@ app.post("/login", async (req, res) => {
     }
   
 })
-
 
 app.post("/cargadb", async (req, res) => {
   const { data } = req.body
@@ -245,28 +309,18 @@ app.post("/altauser", async (req, res) => {
 
 })
 
-app.get("/prb",(req,res)=>{
-  
-  const secret = process.env.SECRET
-  const cuk = req.cookies
-
-  const payLoad = jwt.verify(cuk.token,secret)
-  
-
-  return res.status(200).send({"usser":payLoad.uss,"nombre":payLoad.nombre,"legajo":payLoad.legajo})
-})
-
 app.get("/consexp",(req,res)=>{
   
   const secret = process.env.SECRET
-  const cuk = req.cookies
+  const cuk = req.query.token
 
-  const cant = Object.keys(cuk)
-  const longitud = cant.length
+  //console.log("desde /consexp ... token  "+cuk)
+
+  if(!cuk) return res.send({"auth":false})
   
-  if( longitud === 0) return res.send({"auth":false})
+  // if( longitud === 0) return res.send({"auth":false})
   
-  const payLoad = jwt.verify(cuk.token,secret)
+  const payLoad = jwt.verify(cuk,secret)
   
   const ahora = Date.now()
 
@@ -349,7 +403,7 @@ app.get("/delete/", (req,res)=>{
   })
 })
 
-app.get("/consultadb",verifToken,async(req,res)=>{
+app.get("/consultadb",tokenVal,async(req,res)=>{
 
   console.log(req.cookies.token)
 
@@ -367,10 +421,15 @@ try {
 
 })
 
-app.get("/tnav",verifToken,async (req,res)=>{
+app.get("/tnav",(req,res)=>{
 
-  const tokenId = req.cookies.token
-  console.log(tokenId)
-  const navToken = await tokenData(tokenId)
+  const tokenId = req.query.token
+
+  const navToken = tokenData(tokenId)
   return res.json(navToken)
+})
+
+app.get("/prb",prbSite,(req,res)=>{
+  console.log("buenas")
+  res.send("buennas")
 })

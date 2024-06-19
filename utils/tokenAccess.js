@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken")
 
+const cookieParser = require("cookie-parser");
+
+
 require("dotenv").config();
 
 
@@ -25,50 +28,53 @@ const tokenCreate = (data0)=> {
 
 }
 
-const verifToken = async (req,res,next)=>{
+// const verifToken = async (req,res,next)=>{
     
-    const {token} = req.cookies
+//     const dataToken = req.cookies
 
-    console.log("Cookie token "+token)
+//     console.log("Cookie token --> "+dataToken)
 
-    if(!token) next(new Error("Sin Token Cris"))
+//     if(!dataToken) next(new Error("Sin Token Cris"))
     
-    try {
-        const verTok = jwt.verify(token,process.env.SECRET)
+//     try {
+//         const verTok = jwt.verify(dataToken,process.env.SECRET)
 
-        if(verTok.exp < Date.now()) console.log("ya paso")
+//         if(verTok.exp < Date.now()) console.log("ya paso")
         
-        console.log(verTok.exp)
-        console.log(Date.now())
+//         console.log(verTok.exp)
+//         console.log(Date.now())
     
-        if(!verTok){
-                res.setHeader('Access-Control-Allow-Origin', '*');
-                res.send('<a href="http://192.168.0.16:3000"> Consulte con el Administrador (Err-1005)</a>')
-        }else{
-            if(verTok.exp < Date.now()){
-                res.setHeader('Access-Control-Allow-Origin', '*');
-                //res.redirect('http://192.168.0.16')
-        res.send('<a href="http://192.168.0.16:3000"> Consulte con el Administrador (Err-1005)</a>')
+//         if(!verTok){
+//                 res.setHeader('Access-Control-Allow-Origin', '*');
+//                 res.send('<a href="http://192.168.0.16:3000"> Consulte con el Administrador (Err-1005)</a>')
+//         }else{
+//             if(verTok.exp < Date.now()){
+//                 res.setHeader('Access-Control-Allow-Origin', '*');
+//                 //res.redirect('http://192.168.0.16')
+//         res.send('<a href="http://192.168.0.16:3000"> Consulte con el Administrador (Err-1005)</a>')
 
-            } 
-        }
+//             } 
+//         }
         
-    } catch (error) {
-        console.log(error)
+//     } catch (error) {
+//         console.log(error)
 
 
-        res.json({"tokenError":true})
+//         res.json({"tokenError":true})
 
-    }
+//     }
     
-    next()
-}
+//     next()
+// }
 
-const tokenData = (token)=>{
+const tokenData = (tokenId)=>{
 
-    if(!token) return res.json({"tokenError":true})
+    //const tkn = req.cookies.token
+    //console.log("token data -->" +tokenId)
 
-    const payLoad = jwt.verify(token,secret)
+    if(tokenId===undefined) return {"tokenError":true}
+
+    const payLoad = jwt.verify(tokenId,secret)
     
     return {
         "usuario":payLoad.uss,
@@ -78,4 +84,4 @@ const tokenData = (token)=>{
     }
 }
 
-module.exports = {tokenCreate, verifToken, tokenData}
+module.exports = {tokenCreate, tokenData}

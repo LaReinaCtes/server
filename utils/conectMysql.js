@@ -28,9 +28,9 @@ const conectando = async (nameTable, user) => {
     //original ::::::: con.query(`SELECT * FROM ${nameTable} WHERE arrobanombre = '${user}'`, (err, row) => {
         //console.log(err, row)
 //__________________
-        con.query(`SELECT * FROM ${nameTable} WHERE arrobanombre = '${user}'`, (err, row) => {
+         con.query(`SELECT * FROM ${nameTable} WHERE arrobanombre = '${user}'`, (err, row) => {
         if (row.length === 0){
-          console.log(`desde conectMysql (Error):`, row[0]);
+          console.log(`desde conectando(conectMysql.js) (Error):`, );
           return resolve({
             "auth": false,
             "mensaje": "Err01"
