@@ -21,7 +21,7 @@ const tokenCreate = (data0)=> {
         nombre,
         legajo,
         nivel,
-        exp:Date.now() + 600 * 1000
+        exp:Date.now() + 60000 * 1000
     },secret)
 
     return token

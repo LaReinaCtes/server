@@ -114,6 +114,9 @@ const tokenVal =  async (req,res,next)=>{
   
             } 
         }
+
+        req.creator = verTok.legajo
+        console.log(req.creator)
         
     } catch (error) {
         console.log(error)
@@ -273,34 +276,43 @@ app.post("/cargaproveed", async (req, res) => {
 
 })
 
-app.post("/altauser", async (req, res) => {
+app.post("/altauser",tokenVal, async (req, res) => {
 
+  console.log("desde altauser: "+req.creator)
+  
   const nombreusuario = req.body.data.user
   const nombrecompleto = req.body.data.nombreCompleto
   const userpass = await crypUserPass(req.body.data.pass)
-  const creator = req.body.data.creator
+  const creator = req.creator
   const nivel = req.body.data.nivel
   const local = req.body.data.local
   const dni = req.body.data.dni
   const legajo = req.body.data.legajo
+  const foto = req.body.data.foto
 
   const usuarioData = [nombreusuario, userpass, creator, nivel,local,nombrecompleto,dni,legajo]
-
+  console.log("FOTO")
+  const fotito = req
+  //console.log(fotito)
   
 
   // ############################
 
-  const userExist = await consultaUsuario("tablaprb", nombreusuario)
+  const userExist = await consultaUsuario("tablaprb", nombreusuario, dni,legajo)
   
   if (!userExist) {
     //console.log(userExist)
     return res.send({
-      "mensaje": "Cliente existente, cambie nombre de Usuario"
+      "mensaje": "Datos existente, consulte los datos"
     })
 
   }else{
 
     await crearUsuario("tablaprb",usuarioData)
+
+
+    //fotito.mv("./fotos/"+legajo+".jpg")
+
     
     return res.send({
       "mensaje": "Usuario dado de ALTA"
@@ -370,8 +382,38 @@ app.post("/upload", async (req,res)=>{
       })
     }else{
       const {fileup} = req.files
+      console.log(req)
 
       fileup.mv("./download/"+fileup.name)
+
+      res.send({
+        status:true,
+        message: "Hecho, cargado"
+      })
+
+    }
+  } catch (error) {
+    res.status(500).send(error)
+  }
+
+})
+
+app.post("/fotos", async (req,res)=>{
+
+  console.log(req.files)
+
+  try {
+    if(!req.files){
+      res.send({
+        status: false,
+        message:"No hay archivos"
+      })
+    }else{
+      const {foto} = req.files
+      const {legajo} = req.body
+      console.log(req)
+
+      foto.mv("./fotos/"+legajo+".jpg")
 
       res.send({
         status:true,

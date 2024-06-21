@@ -9,14 +9,14 @@ const con = mysql.createPool({
 
 
 
-async function consulta(nametable,data) {
-    console.log("usersDb aca",data)
+async function consulta(nametable,nombreusuario, dni, legajo) {
+    //console.log("usersDb aca",data)
 
-    const sql = `SELECT * FROM ${nametable} WHERE arrobanombre = ?`
+    const sql = `SELECT * FROM ${nametable} WHERE arrobanombre = ? OR dni= ? OR legajo= ?`
     
     return new Promise((resolve, reject) => {
 
-    con.query(sql, [data], (err, result) => {
+    con.query(sql, [nombreusuario, dni, legajo], (err, result) => {
             
         console.log("funcion consulta ",result)
         
@@ -33,9 +33,9 @@ async function consulta(nametable,data) {
 }
 
 
-async function consultaUsuario (nameTable, data){
+async function consultaUsuario (nameTable, nombreusuario, dni, legajo){
     
-    const verif = await consulta(nameTable,data);
+    const verif = await consulta(nameTable,nombreusuario, dni, legajo);
 
     console.log("verif",verif)
 
