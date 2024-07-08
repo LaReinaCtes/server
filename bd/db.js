@@ -1,4 +1,4 @@
-const dbUsuarios = [
+module.exports.dbUsuarios = [
     {
       "_id": "6563d801acc2a7a7fac236f9",
       "index": 0,

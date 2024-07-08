@@ -1,29 +1,20 @@
-const mysql = require('mysql')
+const dbtraslado = require('../DB/Final.js')
+const db =dbtraslado.DBTRASLADO[3].observaciones.length
+const dbcero = dbtraslado.DBTRASLADO[3].observaciones
+//console.log(dbtraslado.DBTRASLADO[3]["observaciones"])
 
-const con = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "ussers"
-})
-
-const conectando = () => {
-
-
-  con.query("SELECT * FROM tablaprb WHERE nombre = 'Rsales'", (err, row) => {
-    try {
-      if(row.length===0) return console.log("mala cosa")
   
-      return console.log("row", row[0].nombre)
-  
-    } catch (err) {
-     
-      return console.log(
-        "err",        
-      )
-      
-    }
-})
-}
+  for (let j = 0; j < db; j++) {
+    const creado = "RR-HH"
+    const dni = dbcero[j].documento
+    const fecha = dbcero[j].fecha
+    const foto_obs = ""
+    const local = ""
+    const tipo = ""
+    const observ = dbcero[j].obs
 
-conectando()
+    const trasladoRowObs = [creado,dni,fecha,foto_obs,local,tipo,observ]
+    console.log(trasladoRowObs)
+  }
+  
+// }

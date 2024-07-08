@@ -23,7 +23,7 @@ const MySQLStore = require("express-mysql-session")(session);
 const {dcryptUserPass, crypUserPass} = require("./utils/crypUncryt.js");
 
 
-const { conectando,controlSessiones } = require("./utils/conectMysql.js");
+const { conectando,trasladoDB, trasladoDbOserv } = require("./utils/conectMysql.js");
 const { cargaRemitos, cargaRemitos2, proveedorADb, consultaCuit} = require("./utils/remitoDb.js");
 const { consultaUsuario, crearUsuario , prb, consultaLocalNivel } = require("./utils/usersDb.js");
 const {tokenCreate, tokenData} = require ("./utils/tokenAccess.js")
@@ -414,6 +414,7 @@ app.post("/fotos", async (req,res)=>{
       console.log(req)
 
       foto.mv("./fotos/"+legajo+".jpg")
+      console.log(foto)
 
       res.send({
         status:true,
@@ -474,4 +475,10 @@ app.get("/tnav",(req,res)=>{
 app.get("/prb",prbSite,(req,res)=>{
   console.log("buenas")
   res.send("buennas")
+})
+
+app.get("/traslado",(req,res)=>{
+  const trlsd = trasladoDbOserv()
+  res.json(trlsd)
+
 })
