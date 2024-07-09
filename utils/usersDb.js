@@ -107,4 +107,28 @@ const consultaLocalNivel = (tabla)=>{
 
 }
 
-module.exports = { consultaUsuario,crearUsuario, prb, consultaLocalNivel }
+const personalDb = (dniNombre)=>{
+
+  const sql = `SELECT * FROM personal WHERE concat(documento,nombre) LIKE "%${dniNombre}%";`
+
+
+
+  return new Promise((resolve, reject) => {
+
+    con.query(sql,dniNombre, (err, result) => {
+        
+        if(err) return resolve(console.log(err))
+          
+        if(!result[0]){
+            return resolve (false)
+        }else{
+            return resolve (result)
+        }
+  
+        })
+    })
+
+
+}
+
+module.exports = { consultaUsuario,crearUsuario, prb, consultaLocalNivel,personalDb }

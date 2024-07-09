@@ -25,7 +25,7 @@ const {dcryptUserPass, crypUserPass} = require("./utils/crypUncryt.js");
 
 const { conectando,trasladoDB, trasladoDbOserv } = require("./utils/conectMysql.js");
 const { cargaRemitos, cargaRemitos2, proveedorADb, consultaCuit} = require("./utils/remitoDb.js");
-const { consultaUsuario, crearUsuario , prb, consultaLocalNivel } = require("./utils/usersDb.js");
+const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,personalDb } = require("./utils/usersDb.js");
 const {tokenCreate, tokenData} = require ("./utils/tokenAccess.js")
 
 
@@ -87,7 +87,7 @@ const tokenVal =  async (req,res,next)=>{
     
     const dataToken = req.query.token
 
-    if(dataToken===undefined) res.json({"tokenError":true})
+    if(dataToken===undefined) return res.json({"tokenError":true})
     
   //  console.log("Cookie token --> "+Object.keys(dataToken))
   //console.log("Cookie token --> "+dataToken)
@@ -480,5 +480,16 @@ app.get("/prb",prbSite,(req,res)=>{
 app.get("/traslado",(req,res)=>{
   const trlsd = trasladoDbOserv()
   res.json(trlsd)
+
+})
+
+app.get("/personaldb",tokenVal,async(req,res)=>{
+
+  const {dniNombre} = req.query.data
+  console.log("desde PersonalDb :"+dniNombre)
+
+
+  const persona = await personalDb(dniNombre)
+  res.json(persona)
 
 })
