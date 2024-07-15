@@ -25,7 +25,7 @@ const {dcryptUserPass, crypUserPass} = require("./utils/crypUncryt.js");
 
 const { conectando,trasladoDB, trasladoDbOserv } = require("./utils/conectMysql.js");
 const { cargaRemitos, cargaRemitos2, proveedorADb, consultaCuit} = require("./utils/remitoDb.js");
-const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,personalDb } = require("./utils/usersDb.js");
+const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,personalDb,altaAbm,abmListados} = require("./utils/usersDb.js");
 const {tokenCreate, tokenData} = require ("./utils/tokenAccess.js")
 
 
@@ -83,10 +83,9 @@ app.use(session({
 
 const tokenVal =  async (req,res,next)=>{
 
-  //cookieParser(req,res,next)
-    
-    const dataToken = req.query.token
 
+  const dataVerif=(dataToken)=>{
+  
     if(dataToken===undefined) return res.json({"tokenError":true})
     
   //  console.log("Cookie token --> "+Object.keys(dataToken))
@@ -114,7 +113,7 @@ const tokenVal =  async (req,res,next)=>{
   
             } 
         }
-
+  
         req.creator = verTok.legajo
         console.log(req.creator)
         
@@ -129,10 +128,34 @@ const tokenVal =  async (req,res,next)=>{
     next()
   }
 
-  const prbSite = (req,res,next)=>{
-    return res.send(`<a href='${process.env.SITIOFRONT}'>Error al cargar, vuelva al login.</a>`)
-    next()
+ //···········································
+  cookieParser(req,res,next)
+  console.log(req.body.token)
+
+
+  if(req.query.token){
+    const dataToken =req.query.token
+    console.log("query")
+    dataVerif(dataToken)
+
+ 
+  }else if(req.body.token){
+    const dataToken =req.body.token
+    console.log("body")
+    dataVerif(dataToken)
+
+  }else{
+    return res.send({"mesagge":"Sin token"})
   }
+ //···········································
+
+    
+}
+
+const prbSite = (req,res,next)=>{
+  return res.send(`<a href='${process.env.SITIOFRONT}'>Error al cargar, vuelva al login.</a>`)
+  next()
+}
 
 
 //_____________________________________________________________________________
@@ -492,4 +515,37 @@ app.get("/personaldb",tokenVal,async(req,res)=>{
   const persona = await personalDb(dniNombre)
   res.json(persona)
 
+})
+
+app.post("/altabm",tokenVal,async(req,res)=>{
+ 
+  const {tabla,altadb} = req.body
+  
+
+  console.log(req.params)
+  
+  const aDb = await altaAbm(tabla,altadb)
+  
+  return res.json(aDb)
+})
+
+app.get("/listagral",tokenVal,async(req,res)=>{
+  
+    console.log(req.query.data)
+
+    const {data}=req.query
+
+
+    const response = await abmListados(data)
+
+    return res.json(response)
+
+
+})
+
+app.delete("/abmdelete",tokenVal,async(req,res)=>{
+
+    const abmdelete=req
+    console.log(req)
+    res.send("Ok")
 })
