@@ -25,7 +25,7 @@ const {dcryptUserPass, crypUserPass} = require("./utils/crypUncryt.js");
 
 const { conectando,trasladoDB, trasladoDbOserv } = require("./utils/conectMysql.js");
 const { cargaRemitos, cargaRemitos2, proveedorADb, consultaCuit} = require("./utils/remitoDb.js");
-const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,personalDb,altaAbm,abmListados} = require("./utils/usersDb.js");
+const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,personalDb,altaAbm,abmListados,abmBorrarItem,consultaAltaAbm} = require("./utils/usersDb.js");
 const {tokenCreate, tokenData} = require ("./utils/tokenAccess.js")
 
 
@@ -82,7 +82,6 @@ app.use(session({
 //---------------------------------------------------------
 
 const tokenVal =  async (req,res,next)=>{
-
 
   const dataVerif=(dataToken)=>{
   
@@ -520,13 +519,15 @@ app.get("/personaldb",tokenVal,async(req,res)=>{
 app.post("/altabm",tokenVal,async(req,res)=>{
  
   const {tabla,altadb} = req.body
-  
 
-  console.log(req.params)
+  const consultaAdb = await consultaAltaAbm(tabla,altadb)
+  
+  if(!consultaAdb)return res.send(false)
   
   const aDb = await altaAbm(tabla,altadb)
-  
-  return res.json(aDb)
+  console.log("desde endpoint"+aDb)  
+
+  return res.send(true)
 })
 
 app.get("/listagral",tokenVal,async(req,res)=>{
@@ -545,7 +546,10 @@ app.get("/listagral",tokenVal,async(req,res)=>{
 
 app.delete("/abmdelete",tokenVal,async(req,res)=>{
 
-    const abmdelete=req
-    console.log(req)
-    res.send("Ok")
+    const {dataId,dataTb,dataValor}=req.query
+
+    const response = await abmBorrarItem(dataId,dataTb,dataValor)
+    
+    if(!response) return res.send(false)
+    return res.send(true)
 })

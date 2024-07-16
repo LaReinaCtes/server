@@ -131,61 +131,99 @@ const personalDb = (dniNombre) => {
 
 }
 
-const altaAbm = (data, datainsert) => {
-
-  console.log(data, datainsert)
-
-  const sql = `INSERT INTO ${data} (${data}) VALUES (?);`
-  const sqlConsul = `SELECT * FROM ${data} WHERE ${data} LIKE '%${datainsert}%';`
-
+const consultaAltaAbm = (data, datainsert) => {
+  
   return new Promise((resolve, reject) => {
 
-    con.query(sqlConsul, datainsert, (err, result) => {
+    const sqlConsulta = `SELECT * FROM ${data} WHERE ${data} LIKE '%${datainsert}%';`
+
+    con.query(sqlConsulta, (err, result) => {
 
       if (err) return resolve(console.log(err))
 
-      if (result[0]) {
-        return resolve(false)
+      if (!result[0]) {
+        return resolve(true)
       } else {
-
-        return new Promise((resolve, reject) => {
-
-          con.query(sql, datainsert, (err, result) => {
-
-            if (err) return resolve(console.log(err))
-
-            if (!result[0]) {
-              return resolve(false)
-            } else {
-              return resolve(result)
-            }
-          })
-        })
+        return resolve(false)
       }
+
     })
   })
 
 
 }
 
-const abmListados = (lista)=>{
 
-    const sql = `SELECT * FROM ${lista} ;`
-  
-    return new Promise((resolve, reject) => {
-  
-      con.query(sql, (err, result) => {
-  
+const altaAbm = (data, datainsert) => {
+
+  console.log(data, datainsert)
+
+  const sql = `INSERT INTO ${data} (${data}) VALUES (?);`
+
+  return new Promise((resolve, reject) => {
+
+      con.query(sql, datainsert, (err, result) => {
+
         if (err) return resolve(console.log(err))
-  
-        if (!result[0]) {
-          return resolve(false)
-        } else {
-          return resolve(result)
-        }
-  
+
+        return resolve(true)
+
       })
     })
-  }
 
-module.exports = { consultaUsuario, crearUsuario, prb, consultaLocalNivel, personalDb, altaAbm, abmListados }
+
+}
+
+const abmListados = (lista) => {
+
+  const sql = `SELECT * FROM ${lista} ;`
+
+  return new Promise((resolve, reject) => {
+    try 
+    {
+    con.query(sql, (err, result) => {
+      if(err){
+        console.log(err)
+        return resolve(false)
+      } 
+      
+      if(!result[0]) 
+      {
+        return resolve(false)
+      } else {
+      return resolve(result)
+      }
+    })
+      
+    
+    } catch (err) 
+     {
+      console.log(error)
+     }
+
+  })
+}
+
+const abmBorrarItem = (dataId, dataTb, dataValor) => {
+
+  const sql = `DELETE FROM ${dataTb} WHERE ${dataId}=${dataValor} ;`
+  console.log(sql)
+
+  return new Promise((resolve, reject) => {
+
+    con.query(sql, (err, result) => {
+
+      if (err) return resolve(console.log(err))
+
+      if (!result[0]) {
+        return resolve(true)
+      } else {
+        return resolve(false)
+      }
+
+    })
+  })
+}
+
+
+module.exports = { consultaUsuario, crearUsuario, prb, consultaLocalNivel, personalDb, altaAbm, abmListados, abmBorrarItem, consultaAltaAbm }
