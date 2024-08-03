@@ -226,4 +226,38 @@ const abmBorrarItem = (dataId, dataTb, dataValor) => {
 }
 
 
-module.exports = { consultaUsuario, crearUsuario, prb, consultaLocalNivel, personalDb, altaAbm, abmListados, abmBorrarItem, consultaAltaAbm }
+const comentariosDb = (dni)=>{
+  const sql = `SELECT * FROM ussers.persobserv WHERE dni='${dni}';`
+
+  return new Promise((resolve, reject) => {
+    try 
+    {
+    con.query(sql, (err, result) => {
+      if(err){
+        console.log(err)
+        return resolve(false)
+      } 
+      
+      if(!result[0]) 
+      {
+        return resolve(false)
+      } else {
+      return resolve(result)
+      }
+    })
+      
+    
+    } catch (err) 
+     {
+      console.log(error)
+     }
+
+  })
+
+}
+
+
+
+
+
+module.exports = {comentariosDb,consultaUsuario, crearUsuario, prb, consultaLocalNivel, personalDb, altaAbm, abmListados, abmBorrarItem, consultaAltaAbm }

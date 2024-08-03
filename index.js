@@ -25,7 +25,9 @@ const {dcryptUserPass, crypUserPass} = require("./utils/crypUncryt.js");
 
 const { conectando,trasladoDB, trasladoDbOserv } = require("./utils/conectMysql.js");
 const { cargaRemitos, cargaRemitos2, proveedorADb, consultaCuit} = require("./utils/remitoDb.js");
-const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,personalDb,altaAbm,abmListados,abmBorrarItem,consultaAltaAbm} = require("./utils/usersDb.js");
+const { consultaUsuario, crearUsuario , prb, consultaLocalNivel,
+  personalDb,altaAbm,abmListados,abmBorrarItem,
+  consultaAltaAbm,comentariosDb} = require("./utils/usersDb.js");
 const {tokenCreate, tokenData} = require ("./utils/tokenAccess.js")
 
 
@@ -552,4 +554,15 @@ app.delete("/abmdelete",tokenVal,async(req,res)=>{
     
     if(!response) return res.send(false)
     return res.send(true)
+})
+
+app.get("/coments",tokenVal,async(req,res)=>{
+
+  const datareq = req.query.data 
+  
+  const consultaCmnt = await comentariosDb(datareq)
+  
+  console.log(consultaCmnt)
+  res.json(consultaCmnt)
+  return
 })
